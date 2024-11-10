@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="assets/Rock.ico">
+    <title>Rockogatchi</title>
+    <style>
+        body { font-family: "Open Sans", Arial; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #333; color: #fff; }
+        .game-container { text-align: center; max-width: 400px; padding: 20px; }
+        h1 { font-size: 2em; margin-bottom: 20px; }
+        .rock-container { margin-bottom: 20px; position: relative; }
+        #rock-image { width: 150px; height: 150px; border-radius: 50%; }
+        .sparkle { position: absolute; top: 10px;; left: 60%; transform: translateX(-50%) rotate(45deg); font-size: 2em; display: none; }
+        .speech-bubble { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background-color: #555; padding: 10px; border-radius: 5px; font-size: 0.9em; font-style: italic; color: #fff; display: none; }
+        .stats { margin: 15px 0; }
+        .stats div { margin: 5px; font-size: 1.2em; }
+        #status-message { font-weight: bold; color: #ddd; display: none; }
+        .controls { display: flex; justify-content: center; gap: 10px; }
+        .controls button { width: 50px; height: 50px; border: none; border-radius: 50%; background-color: #555; color: #fff; font-size: 1.1em; cursor: pointer; }
+        .controls button:hover { background-color: #777; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Rockogatchi</h1>
+        <div class="rock-container">
+            <img id="rock-image" src="assets/Rock.png" alt="Rock">
+            <div class="sparkle" id="sparkle">✨</div>
+            <div class="speech-bubble" id="speech-bubble"></div>
+            <div class="stats">
+                <div>Age: <span id="age">0</span></div>
+                <div>Happiness: <span id="happiness">100</span></div>
+                <div>Hunger: <span id="hunger">100</span></div>
+                <div>Energy: <span id="energy">100</span></div>
+                <div>Cleanliness: <span id="cleanliness">100</span></div>
+            </div>
+            <div id="status-message">Your rock is doing well!</div>
+        </div>
+        <div class="controls">
+            <button onclick="playWithRock()">🕹️</button>
+            <button onclick="feedRock()">🍽️</button>
+            <button onclick="restRock()">💤</button>
+            <button onclick="cleanRock()">🧼</button>
+        </div>
+    </div>
+    <script>
+        let rock = { age: 0, happiness: 100, hunger: 100, energy: 100, cleanliness: 100, isAlive: true };
+        let ageInterval, decayInterval, actionLocked = false;
+
+        function updateStats() {
+            document.getElementById('age').innerText = rock.age;
+            document.getElementById('happiness').innerText = rock.happiness;
+            document.getElementById('hunger').innerText = rock.hunger;
+            document.getElementById('energy').innerText = rock.energy;
+            document.getElementById('cleanliness').innerText = rock.cleanliness;
+        }
+
+        function checkIfAlive() {
+            if (rock.happiness <= 0 || rock.hunger <= 0 || rock.energy <= 0 || rock.cleanliness <= 0) {
+                rock.isAlive = false;
+                document.getElementById('status-message').innerText = "Your rock has become dust...";
+                document.getElementById('status-message').style.display = 'block';
+                clearInterval(ageInterval);
+                clearInterval(decayInterval);
+            }
+        }
+
+        function ageRock() {
+            rock.age++;
+            if (rock.age % 10 === 0) evolveRock();
+            updateStats();
+        }
+
+        function evolveRock() {
+            const sparkle = document.getElementById('sparkle');
+            sparkle.style.display = 'none';
+            if (rock.age >= 100){
+                document.getElementById('status-message').innerText = "Your rock has evolved into a Dimond!";
+                document.getElementById('rock-image').src = "assets/Rock.png";
+                sparkle.style.display = 'block';
+            }
+            if (rock.age >= 75){
+                document.getElementById('status-message').innerText = "Your rock has evolved into a Ruby!";
+                document.getElementById('rock-image').src = "assets/Rock.png";
+                sparkle.style.display = 'block';
+            }
+            if (rock.age >= 50) {
+                document.getElementById('status-message').innerText = "Your rock has evolved into a Crystal!";
+                document.getElementById('rock-image').src = "assets/Rock.png";
+                sparkle.style.display = 'block';
+            } else if (rock.age >= 20) {
+                document.getElementById('status-message').innerText = "Your rock has evolved into a Gem!";
+                document.getElementById('rock-image').src = "assets/Rock.png";
+                sparkle.style.display = 'block';
+            } else if (rock.age >= 10) {
+                document.getElementById('status-message').innerText = "Your rock has evolved into a Shiny Stone!";
+                document.getElementById('rock-image').src = "assets/Rock.png";
+                sparkle.style.display = 'block';
+            }
+            document.getElementById('status-message').style.display = 'block';
+            setTimeout(() => sparkle.style.display = 'none', 2000);
+        }
+
+        function decayStats() {
+            if (!rock.isAlive) return;
+            rock.happiness -= 5;
+            rock.hunger -= 5;
+            rock.energy -= 5;
+            rock.cleanliness -= 5;
+            checkIfAlive();
+            updateStats();
+        }
+
+        function showSpeechBubble(text) {
+            const speechBubble = document.getElementById('speech-bubble');
+            speechBubble.innerText = text;
+            speechBubble.style.display = 'block';
+            setTimeout(() => speechBubble.style.display = 'none', 2000);
+        }
+
+        function lockActions() {
+            actionLocked = true;
+            setTimeout(() => actionLocked = false, 2000);
+        }
+
+        function feedRock() {
+            if (actionLocked || !rock.isAlive) return;
+            lockActions();
+            rock.hunger = Math.min(rock.hunger + 20, 100);
+            document.getElementById('status-message').innerText = "You fed your rock!";
+            document.getElementById('status-message').style.display = 'block';
+            showSpeechBubble(["*clunk*", "*munch*", "*nibble*", "*satisfied silence*"][Math.floor(Math.random() * 4)]);
+            updateStats();
+        }
+
+        function playWithRock() {
+            if (actionLocked || !rock.isAlive) return;
+            lockActions();
+            rock.happiness = Math.min(rock.happiness + 20, 100);
+            rock.energy = Math.max(rock.energy - 10, 0);
+            document.getElementById('status-message').innerText = "You played with your rock!";
+            document.getElementById('status-message').style.display = 'block';
+            showSpeechBubble(["*tumble*", "*crash*", "*roll*", "*thud*"][Math.floor(Math.random() * 4)]);
+            checkIfAlive();
+            updateStats();
+        }
+
+        function restRock() {
+            if (actionLocked || !rock.isAlive) return;
+            lockActions();
+            rock.energy = Math.min(rock.energy + 20, 100);
+            document.getElementById('status-message').innerText = "Your rock rested!";
+            document.getElementById('status-message').style.display = 'block';
+            showSpeechBubble(["*rock snoring*", "*quietly stares*", "*meditative stillness*", "*peaceful silence*"][Math.floor(Math.random() * 4)]);
+            updateStats();
+        }
+
+        function cleanRock() {
+            if (actionLocked || !rock.isAlive) return;
+            lockActions();
+            rock.cleanliness = Math.min(rock.cleanliness + 20, 100);
+            document.getElementById('status-message').innerText = "You cleaned your rock!";
+            document.getElementById('status-message').style.display = 'block';
+            showSpeechBubble(["*scrub*", "*polish*", "*shine*"][Math.floor(Math.random() * 3)]);
+            updateStats();
+        }
+
+        ageInterval = setInterval(ageRock, 3000);
+        decayInterval = setInterval(decayStats, 5000);
+    </script>
+</body>
+</html>
